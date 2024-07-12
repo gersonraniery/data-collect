@@ -2,9 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-
-def get_content(url):
-    headers = {
+headers = {
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'accept-language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
         'cache-control': 'max-age=0',
@@ -22,6 +20,7 @@ def get_content(url):
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
     }
 
+def get_content(url):
     resp = requests.get(url, headers=headers)
     return resp
 
@@ -59,9 +58,30 @@ def get_personagem_infos(url):
         data['Aparicoes'] = get_aparicoes(soup)
         return data
 
+def get_links():
+    url = 'https://www.residentevildatabase.com/personagens/'
+    resp = requests.get(url, headers=headers)
+    soup_personagens = BeautifulSoup(resp.text)
+    ancoras = (soup_personagens
+            .find('div', class_='td-page-content')
+            .find_all('a'))
+
+    links = [i['href'] for i in ancoras]
+    return links
+
 # %%
 
 url = 'https://www.residentevildatabase.com/personagens/ada-wong/'
 
 get_personagem_infos(url)
 
+# %%
+
+links = get_links()
+data = []
+for i in links:
+    perso = get_personagem_infos(i)
+    perso['link'] = i
+    data.append(perso)
+# %%
+data
